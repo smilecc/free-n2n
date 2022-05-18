@@ -15,4 +15,6 @@ int edge_start();
 
 void edge_stop();
 
+char *get_edge_info();
+
 #endif //N2N_RUST_H

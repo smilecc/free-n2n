@@ -14,6 +14,9 @@
     "allowlist": {
       "all": true
     },
+    "systemTray": {
+      "iconPath": "icons/icon.png"
+    },
     "bundle": {
       "active": true,
       "category": "DeveloperTool",

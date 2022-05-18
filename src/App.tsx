@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   createStyles,
   Navbar,
@@ -6,6 +6,7 @@ import {
   Code,
   AppShell,
   Button,
+  Modal,
 } from "@mantine/core";
 import {
   BellRinging,
@@ -17,10 +18,15 @@ import {
   Receipt2,
   SwitchHorizontal,
   Logout,
+  Dashboard,
 } from "tabler-icons-react";
 import { Route, Routes, useNavigate } from "react-router-dom";
-import { emit } from "@tauri-apps/api/event";
-import { HomePage } from "./pages";
+import { emit, listen } from "@tauri-apps/api/event";
+import { HomePage } from "@/pages";
+import { appWindow } from "@tauri-apps/api/window";
+import { Observer } from "mobx-react-lite";
+import { ServerAddModal } from "@/components";
+import { useCommonStore } from "./stores";
 
 const useStyles = createStyles((theme, _params, getRef) => {
   const icon = getRef("icon");
@@ -103,7 +109,7 @@ const useStyles = createStyles((theme, _params, getRef) => {
 });
 
 const data = [
-  { link: "/", label: "首页", icon: BellRinging },
+  { link: "/", label: "首页", icon: Dashboard },
   { link: "/test", label: "Billing", icon: Receipt2 },
   { link: "", label: "Security", icon: Fingerprint },
   { link: "", label: "SSH Keys", icon: Key },
@@ -116,6 +122,17 @@ export function App() {
   const navigate = useNavigate();
   const { classes, cx } = useStyles();
   const [active, setActive] = useState("首页");
+  const [closeModal, setCloseModal] = useState(false);
+  const commonStore = useCommonStore();
+
+  useEffect(() => {
+    appWindow.listen("tauri://close-requested", () => {
+      console.log("close");
+      appWindow.hide();
+      // setCloseModal(true);
+      // appWindow.close();
+    });
+  }, []);
 
   const links = data.map((item) => (
     <a
@@ -141,10 +158,21 @@ export function App() {
         <Navbar width={{ sm: 300 }} p="md">
           <Navbar.Section grow>
             <Group className={classes.header} position="apart">
-              <div>N2N</div>
+              <div className="select-none font-bold">Free N2N</div>
               <Code sx={{ fontWeight: 700 }}>v3.1.2</Code>
             </Group>
             {links}
+            <Observer>
+              {() => (
+                <>
+                  <div>{JSON.stringify(commonStore)}</div>
+                  <ServerAddModal
+                    opened={commonStore.serverAddModal}
+                    onClose={() => (commonStore.serverAddModal = false)}
+                  />
+                </>
+              )}
+            </Observer>
           </Navbar.Section>
 
           <Navbar.Section className={classes.footer}>
@@ -160,15 +188,28 @@ export function App() {
             <a
               href="#"
               className={classes.link}
-              onClick={(event) => event.preventDefault()}
+              onClick={(event) => {
+                appWindow.close();
+              }}
             >
               <Logout className={classes.linkIcon} />
-              <span>Logout</span>
+              <span>退出应用</span>
             </a>
           </Navbar.Section>
         </Navbar>
       }
     >
+      <Modal
+        centered
+        opened={closeModal}
+        onClose={() => setCloseModal(false)}
+        title="确认"
+      >
+        <div className="flex">
+          <div>1</div>
+          <div>1</div>
+        </div>
+      </Modal>
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/test" element={<div>test</div>} />

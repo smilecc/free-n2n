@@ -1012,13 +1012,13 @@ static void term_handler(int sig)
 
 n2n_edge_conf_t conf;         /* generic N2N edge config */
 n2n_tuntap_priv_config_t ec;  /* config used for standalone program execution */
+n2n_edge_t *eee;              /* single instance for this program */
 
 /** Entry point to program from kernel. */
 int edge_start() {
 
     int rc;
     tuntap_dev tuntap;            /* a tuntap device */
-    n2n_edge_t *eee;              /* single instance for this program */
     uint8_t runlevel = 0;         /* bootstrap: runlevel */
     uint8_t seek_answer = 1;      /*            expecting answer from supernode */
     time_t now, last_action = 0;  /*            timeout */
@@ -1391,4 +1391,29 @@ int edge_set_config(char key, char *value) {
 
 void edge_stop() {
     keep_on_running = 0;
+}
+
+char *get_edge_info() {
+    static char buf[2048] = {0};
+
+    if (eee != NULL) {
+        macstr_t mac_buf;
+
+        sprintf(
+                buf,
+                "{\"ip_addr\":\"%s\",\"device_name\":\"%s\",\"device_mac\":\"%s\",\"mtu\":%d,\"metric\":%d}",
+                eee->tuntap_priv_conf.ip_addr,
+                eee->device.device_name,
+                macaddr_str(mac_buf, eee->device.mac_addr),
+                eee->device.mtu,
+                eee->device.metric
+        );
+
+        printf("resp %s\n", buf);
+        printf("mtu %d %d\n", eee->tuntap_priv_conf.mtu, eee->device.mtu);
+
+        return buf;
+    } else {
+        return buf;
+    }
 }
