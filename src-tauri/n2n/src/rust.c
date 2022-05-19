@@ -1378,6 +1378,10 @@ void edge_init_config() {
 #ifdef WIN32
     initWin32();
 #endif
+    if (getTraceFile() == NULL) {
+        setTraceFile(fopen("n2n.log", "w"));
+    }
+
     /* Defaults */
     edge_init_conf_defaults(&conf);
     memset(&ec, 0, sizeof(ec));
@@ -1391,6 +1395,8 @@ int edge_set_config(char key, char *value) {
 
 void edge_stop() {
     keep_on_running = 0;
+    fclose(getTraceFile());
+    setTraceFile(NULL);
 }
 
 char *get_edge_info() {

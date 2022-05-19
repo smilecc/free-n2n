@@ -85,6 +85,10 @@ void setTraceFile (FILE *f) {
     traceFile = f;
 }
 
+FILE *getTraceFile () {
+    return traceFile;
+}
+
 void closeTraceFile () {
 
     if((traceFile != NULL) && (traceFile != stdout)) {

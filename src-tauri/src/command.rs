@@ -55,6 +55,10 @@ pub fn start_edge(server: String) {
             n2n::edge_set_config('z' as c_char, CString::new("1").unwrap().into_raw());
         }
 
+        if cfg!(not(windows)) {
+            n2n::edge_set_config('f' as c_char, CString::new("").unwrap().into_raw());
+        }
+
         n2n::edge_start();
     }
 }
@@ -70,6 +74,7 @@ pub fn stop_edge() {
 #[tauri::command]
 #[allow(dead_code)]
 pub fn get_edge_info() -> String {
+    println!("test");
     return unsafe {
         n2n::convert_c_string(n2n::get_edge_info())
             .unwrap_or("")

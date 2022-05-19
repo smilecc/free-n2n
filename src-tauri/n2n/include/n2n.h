@@ -194,6 +194,7 @@ int n2n_transop_zstd_init (const n2n_edge_conf_t *conf, n2n_trans_op_t *ttt);
 void setTraceLevel (int level);
 void setUseSyslog (int use_syslog);
 void setTraceFile (FILE *f);
+FILE *getTraceFile ();
 int getTraceLevel ();
 void closeTraceFile ();
 void _traceEvent (int eventTraceLevel, char* file, int line, char * format, ...);

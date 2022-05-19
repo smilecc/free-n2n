@@ -21,7 +21,8 @@
     "react-dom": "^18.0.0",
     "react-i18next": "^11.16.9",
     "react-router-dom": "6",
-    "tabler-icons-react": "^1.48.0"
+    "tabler-icons-react": "^1.48.0",
+    "tauri-plugin-log-api": "github:tauri-apps/tauri-plugin-log#dev"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^1.0.0-rc.10",

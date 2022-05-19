@@ -159,13 +159,17 @@ export function App() {
           <Navbar.Section grow>
             <Group className={classes.header} position="apart">
               <div className="select-none font-bold">Free N2N</div>
-              <Code sx={{ fontWeight: 700 }}>v3.1.2</Code>
+              <Observer>
+                {() => (
+                  <Code sx={{ fontWeight: 700 }}>v{commonStore.version}</Code>
+                )}
+              </Observer>
             </Group>
             {links}
             <Observer>
               {() => (
                 <>
-                  <div>{JSON.stringify(commonStore)}</div>
+                  <div className="break-all">{JSON.stringify(commonStore)}</div>
                   <ServerAddModal
                     opened={commonStore.serverAddModal}
                     onClose={() => (commonStore.serverAddModal = false)}
