@@ -14,8 +14,9 @@
     "allowlist": {
       "all": true,
       "fs": {
+        "all": true,
         "scope": [
-          "$APP/*"
+          "$RESOURCE/*"
         ]
       }
     },
@@ -46,7 +47,9 @@
         "providerShortName": null,
         "signingIdentity": null
       },
-      "resources": [],
+      "resources": [
+        "logs/*"
+      ],
       "shortDescription": "",
       "targets": "all",
       "windows": {
@@ -66,7 +69,7 @@
         "fullscreen": false,
         "height": 800,
         "resizable": false,
-        "title": "N2N",
+        "title": "Free N2N",
         "width": 1000
       }
     ]

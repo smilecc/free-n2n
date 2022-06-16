@@ -47,7 +47,6 @@ export const HomePage: React.FC = () => {
 
   const startEdge = useCallback(() => {
     if (form.values.server) {
-      fs.writeTextFile("n2n.log", "", {});
       const server: IServer = JSON.parse(form.values.server);
       invoke("start_edge", { server: form.values.server });
       commonStore.state = "RUNNING";

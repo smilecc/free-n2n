@@ -1373,6 +1373,12 @@ int edge_start() {
     eee = NULL;
     traceEvent(TRACE_INFO, "Client Close");
 
+    // 关闭日志文件
+    if (getTraceFile() != NULL) {
+        fclose(getTraceFile());
+        setTraceFile(NULL);
+    }
+
     return (rc);
 }
 
@@ -1383,7 +1389,7 @@ void edge_init_config() {
     initWin32();
 #endif
     if (getTraceFile() == NULL) {
-        setTraceFile(fopen("n2n.log", "w"));
+        setTraceFile(fopen("./logs/n2n.log", "w"));
     }
 
     /* Defaults */
@@ -1400,8 +1406,6 @@ int edge_set_config(char key, char *value) {
 void edge_stop() {
     keep_on_running = 0;
     global_keep_running = 0;
-//    fclose(getTraceFile());
-//    setTraceFile(NULL);
 }
 
 char *get_edge_info() {

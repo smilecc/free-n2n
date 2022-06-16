@@ -1,7 +1,8 @@
 import { IServer } from "@/components";
-import { os, app, invoke, fs } from "@tauri-apps/api";
-import { BaseDirectory } from "@tauri-apps/api/fs";
-import { makeAutoObservable } from "mobx";
+import { os, app, invoke, fs, path } from "@tauri-apps/api";
+import { BaseDirectory, readTextFile } from "@tauri-apps/api/fs";
+import { resourceDir } from "@tauri-apps/api/path";
+import { makeAutoObservable, runInAction } from "mobx";
 
 export type EdgeState = "INIT" | "STOP" | "STOPPING" | "STARTING" | "RUNNING";
 
@@ -11,28 +12,44 @@ export class CommonStore {
 
     this.loadServer();
     os.type().then((os) => {
-      this.os = os as any;
+      runInAction(() => {
+        this.os = os as any;
+      });
     });
 
     app.getVersion().then((version) => {
-      this.version = version;
+      runInAction(() => {
+        this.version = version;
+      });
     });
 
     setInterval(() => {
+      (async () => {
+        const logContent = await fs.readTextFile(
+          await path.resolve(await resourceDir(), "logs", "n2n.log")
+        );
+
+        runInAction(() => {
+          this.logContent = logContent;
+        });
+      })();
+
       invoke<string>("get_edge_info")
         .then((serverJson) => {
           if (serverJson) {
             const server = JSON.parse(serverJson);
             console.log(server);
-            this.currentIp = server?.ip_addr || "";
+            runInAction(() => {
+              this.currentIp = server?.ip_addr || "";
 
-            if (this.state == "INIT") {
-              this.state = server?.ip_addr ? "RUNNING" : "STOP";
-            } else if (server?.ip_addr && this.state == "STARTING") {
-              this.state = "RUNNING";
-            } else if (!server?.ip_addr && this.state == "STOPPING") {
-              this.state = "STOP";
-            }
+              if (this.state == "INIT") {
+                this.state = server?.ip_addr ? "RUNNING" : "STOP";
+              } else if (server?.ip_addr && this.state == "STARTING") {
+                this.state = "RUNNING";
+              } else if (!server?.ip_addr && this.state == "STOPPING") {
+                this.state = "STOP";
+              }
+            });
           }
         })
         .catch((reason) => {
@@ -47,6 +64,7 @@ export class CommonStore {
   servers: IServer[] = [];
   state: EdgeState = "INIT";
   currentIp: string = "";
+  logContent: string = "";
 
   saveServer() {
     fs.writeFile(
