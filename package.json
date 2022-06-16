@@ -12,6 +12,7 @@
     "@mantine/core": "^4.2.5",
     "@mantine/form": "^4.2.5",
     "@mantine/hooks": "^4.2.5",
+    "@mantine/prism": "^4.2.9",
     "@tauri-apps/api": "^1.0.0",
     "ahooks": "^3.3.12",
     "i18next": "^21.8.3",

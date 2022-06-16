@@ -22,7 +22,7 @@ import {
 } from "tabler-icons-react";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import { emit, listen } from "@tauri-apps/api/event";
-import { HomePage } from "@/pages";
+import { HomePage, LogPage } from "@/pages";
 import { appWindow } from "@tauri-apps/api/window";
 import { Observer } from "mobx-react-lite";
 import { ServerAddModal } from "@/components";
@@ -110,7 +110,7 @@ const useStyles = createStyles((theme, _params, getRef) => {
 
 const data = [
   { link: "/", label: "首页", icon: Dashboard },
-  { link: "/test", label: "Billing", icon: Receipt2 },
+  { link: "/log", label: "日志", icon: Receipt2 },
   { link: "", label: "Security", icon: Fingerprint },
   { link: "", label: "SSH Keys", icon: Key },
   { link: "", label: "Databases", icon: DatabaseImport },
@@ -169,7 +169,7 @@ export function App() {
             <Observer>
               {() => (
                 <>
-                  <div className="break-all">{JSON.stringify(commonStore)}</div>
+                  {/* <div className="break-all">{JSON.stringify(commonStore)}</div> */}
                   <ServerAddModal
                     opened={commonStore.serverAddModal}
                     onClose={() => (commonStore.serverAddModal = false)}
@@ -216,6 +216,7 @@ export function App() {
       </Modal>
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/log" element={<LogPage />} />
         <Route path="/test" element={<div>test</div>} />
       </Routes>
     </AppShell>
