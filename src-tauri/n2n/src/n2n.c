@@ -317,6 +317,10 @@ N2N_THREAD_RETURN_DATATYPE resolve_thread(N2N_THREAD_PARAMETER_DATATYPE p) {
     time_t                  now;
 
     while(1) {
+        if (global_keep_running == 0) {
+            break;
+        }
+
         sleep(N2N_RESOLVE_INTERVAL / 60); /* wake up in-between to check for signaled requests */
 
         // what's the time?

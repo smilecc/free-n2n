@@ -12,7 +12,12 @@
   },
   "tauri": {
     "allowlist": {
-      "all": true
+      "all": true,
+      "fs": {
+        "scope": [
+          "$APP/*"
+        ]
+      }
     },
     "systemTray": {
       "iconPath": "icons/icon.png"

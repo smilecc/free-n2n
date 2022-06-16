@@ -179,6 +179,8 @@
 
 /* ************************************** */
 
+static int global_keep_running = 0;
+
 /* Transop Init Functions */
 int n2n_transop_null_init (const n2n_edge_conf_t *conf, n2n_trans_op_t *ttt);
 int n2n_transop_tf_init (const n2n_edge_conf_t *conf, n2n_trans_op_t *ttt);

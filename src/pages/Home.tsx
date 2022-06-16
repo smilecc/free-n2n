@@ -10,24 +10,14 @@ import {
   Group,
   Text,
   SimpleGrid,
-  Title,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { Observer } from "mobx-react-lite";
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useCommonStore } from "../stores";
 import { invoke } from "@tauri-apps/api/tauri";
-
-// setInterval(() => {
-//   invoke<string>("get_edge_info")
-//     .then((ip) => {
-//       console.log(ip);
-//     })
-//     .catch((reason) => {
-//       console.log("err", reason);
-//     });
-// }, 1000);
+import * as fs from "@tauri-apps/api/fs";
 
 export const HomePage: React.FC = () => {
   const { t } = useTranslation();
@@ -45,11 +35,30 @@ export const HomePage: React.FC = () => {
   useEffect(() => {
     if (form.values.server) {
       const server: IServer = JSON.parse(form.values.server);
-      form.setFieldValue("community", server.community);
-      // invoke("start_edge", { server: JSON.stringify(server) });
+      form.setValues({
+        ...form.values,
+        community: server.community,
+        autoIP: true,
+      });
+
       console.log(server);
     }
   }, [form.values.server]);
+
+  const startEdge = useCallback(() => {
+    if (form.values.server) {
+      fs.writeTextFile("n2n.log", "", {});
+      const server: IServer = JSON.parse(form.values.server);
+      invoke("start_edge", { server: form.values.server });
+      commonStore.state = "RUNNING";
+      console.log("Server Start", server);
+    }
+  }, [form.values]);
+
+  const stopEdge = useCallback(() => {
+    invoke("stop_edge", { server: form.values.server });
+    commonStore.state = "STOPPING";
+  }, []);
 
   return (
     <div>
@@ -89,7 +98,7 @@ export const HomePage: React.FC = () => {
           <Switch
             className="mt-2"
             label="自动获取地址"
-            {...form.getInputProps("autoIP")}
+            {...form.getInputProps("autoIP", { type: "checkbox" })}
           />
           {form.values.autoIP || (
             <TextInput
@@ -104,16 +113,24 @@ export const HomePage: React.FC = () => {
           <Observer>
             {() => {
               switch (commonStore.state) {
+                case "INIT":
+                  return <Button loading>初始化中</Button>;
                 case "STOP":
+                  return <Button onClick={startEdge}>启动服务</Button>;
+                case "STOPPING":
                   return (
-                    <Button onClick={() => (commonStore.state = "RUNNING")}>
-                      启动服务
+                    <Button loading color="red">
+                      停止中
                     </Button>
                   );
                 case "STARTING":
                   return <Button loading>服务启动中</Button>;
                 case "RUNNING":
-                  return <Button color="red">停止服务</Button>;
+                  return (
+                    <Button color="red" onClick={stopEdge}>
+                      停止服务
+                    </Button>
+                  );
                 default:
                   return null;
               }
@@ -133,12 +150,18 @@ export const HomePage: React.FC = () => {
         <Paper withBorder p="md" radius="md">
           <Group position="apart">
             <Text size="xs" color="dimmed" className="font-bold">
-              测试
+              IP地址
             </Text>
           </Group>
 
           <Group align="flex-end" spacing="xs" mt={12}>
-            <Text className="text-lg font-bold">123</Text>
+            <Observer>
+              {() => (
+                <Text className="text-lg font-bold">
+                  {commonStore.currentIp || "-"}
+                </Text>
+              )}
+            </Observer>
           </Group>
         </Paper>
       </SimpleGrid>

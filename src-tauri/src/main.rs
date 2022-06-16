@@ -3,9 +3,9 @@
     windows_subsystem = "windows"
 )]
 
-use std::ffi::CString;
-use std::os::raw::c_char;
-use std::thread;
+// use std::ffi::CString;
+// use std::os::raw::c_char;
+// use std::thread;
 
 use tauri::{CustomMenuItem, Manager, SystemTray, SystemTrayMenu, SystemTrayMenuItem};
 use tauri_plugin_log::{LogTarget, LoggerBuilder};
@@ -14,6 +14,10 @@ mod command;
 mod n2n;
 
 fn main() {
+    unsafe {
+        n2n::print_n2n_version();
+    }
+
     // 创建托盘菜单
     let menu = SystemTrayMenu::new()
         .add_item(CustomMenuItem::new("test", "测试"))
@@ -28,20 +32,6 @@ fn main() {
                 .build(),
         )
         .setup(|app| {
-            unsafe {
-                n2n::print_n2n_version();
-            }
-
-            thread::spawn(|| unsafe {
-                n2n::edge_init_config();
-                n2n::edge_set_config('c' as c_char, CString::new("hello").unwrap().into_raw());
-                n2n::edge_set_config(
-                    'l' as c_char,
-                    CString::new("n2n.s1.bugxia.com:9527").unwrap().into_raw(),
-                );
-                n2n::edge_start();
-            });
-
             let main_window = app.get_window("main").unwrap();
             main_window.listen("test", |_| unsafe {
                 n2n::edge_stop();

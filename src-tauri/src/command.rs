@@ -1,4 +1,4 @@
-use std::{ffi::CString, os::raw::c_char};
+use std::{ffi::CString, os::raw::c_char, thread};
 
 use serde::{Deserialize, Serialize};
 
@@ -24,7 +24,7 @@ pub fn start_edge(server: String) {
     let config: N2NServer = serde_json::from_str(server.as_str()).unwrap();
     println!("{:#?}", config);
 
-    unsafe {
+    thread::spawn(move || unsafe {
         n2n::edge_init_config();
         n2n::edge_set_config('l' as c_char, CString::new(config.host).unwrap().into_raw());
         n2n::edge_set_config(
@@ -60,7 +60,7 @@ pub fn start_edge(server: String) {
         }
 
         n2n::edge_start();
-    }
+    });
 }
 
 #[tauri::command]
@@ -74,7 +74,6 @@ pub fn stop_edge() {
 #[tauri::command]
 #[allow(dead_code)]
 pub fn get_edge_info() -> String {
-    println!("test");
     return unsafe {
         n2n::convert_c_string(n2n::get_edge_info())
             .unwrap_or("")

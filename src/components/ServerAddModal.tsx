@@ -66,6 +66,7 @@ export const ServerAddModal: React.FC<IServerAddModalProps> = (props) => {
       <form
         onSubmit={form.onSubmit((value: IServer) => {
           commonStore.servers.push(value);
+          commonStore.saveServer();
           props.onClose();
         })}
       >

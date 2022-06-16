@@ -12,7 +12,7 @@
     "@mantine/core": "^4.2.5",
     "@mantine/form": "^4.2.5",
     "@mantine/hooks": "^4.2.5",
-    "@tauri-apps/api": "^1.0.0-rc.5",
+    "@tauri-apps/api": "^1.0.0",
     "ahooks": "^3.3.12",
     "i18next": "^21.8.3",
     "mobx": "^6.5.0",
@@ -25,7 +25,7 @@
     "tauri-plugin-log-api": "github:tauri-apps/tauri-plugin-log#dev"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^1.0.0-rc.10",
+    "@tauri-apps/cli": "^1.0.0",
     "@types/node": "^17.0.34",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",

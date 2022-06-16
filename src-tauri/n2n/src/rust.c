@@ -1344,6 +1344,7 @@ int edge_start() {
 #endif
 
     keep_on_running = 1;
+    global_keep_running = 1;
     eee->keep_running = &keep_on_running;
     traceEvent(TRACE_NORMAL, "edge started");
     rc = run_edge_loop(eee);
@@ -1368,6 +1369,9 @@ int edge_start() {
 #ifdef WIN32
     destroyWin32();
 #endif
+
+    eee = NULL;
+    traceEvent(TRACE_INFO, "Client Close");
 
     return (rc);
 }
@@ -1395,14 +1399,16 @@ int edge_set_config(char key, char *value) {
 
 void edge_stop() {
     keep_on_running = 0;
-    fclose(getTraceFile());
-    setTraceFile(NULL);
+    global_keep_running = 0;
+//    fclose(getTraceFile());
+//    setTraceFile(NULL);
 }
 
 char *get_edge_info() {
     static char buf[2048] = {0};
 
     if (eee != NULL) {
+        printf("1\n");
         macstr_t mac_buf;
 
         sprintf(
@@ -1414,12 +1420,17 @@ char *get_edge_info() {
                 eee->device.mtu,
                 eee->device.metric
         );
-
-        printf("resp %s\n", buf);
-        printf("mtu %d %d\n", eee->tuntap_priv_conf.mtu, eee->device.mtu);
-
-        return buf;
     } else {
-        return buf;
+        sprintf(
+                buf,
+                "{\"ip_addr\":\"%s\",\"device_name\":\"%s\",\"device_mac\":\"%s\",\"mtu\":%d,\"metric\":%d}",
+                "",
+                "",
+                "",
+                0,
+                0
+        );
     }
+
+    return buf;
 }
