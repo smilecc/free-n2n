@@ -1244,8 +1244,12 @@ int edge_start() {
 #ifdef WIN32
                     , eee->tuntap_priv_conf.metric
 #endif
-            ) < 0)
-                exit(1);
+            ) < 0) {
+                global_keep_running = 0;
+                keep_on_running = 0;
+                return -1;
+            }
+
             memcpy(&eee->device, &tuntap, sizeof(tuntap));
             traceEvent(TRACE_NORMAL, "created local tap device IP: %s, Mask: %s, MAC: %s",
                        eee->tuntap_priv_conf.ip_addr,
@@ -1412,7 +1416,6 @@ char *get_edge_info() {
     static char buf[2048] = {0};
 
     if (eee != NULL) {
-        printf("1\n");
         macstr_t mac_buf;
 
         sprintf(

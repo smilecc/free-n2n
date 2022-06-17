@@ -6,6 +6,7 @@ use crate::n2n;
 
 #[derive(Serialize, Deserialize, Debug)]
 struct N2NServer {
+    id: String,
     host: String,
     community: String,
     #[serde(rename = "enablePMTU")]

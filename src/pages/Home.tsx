@@ -1,23 +1,13 @@
 import { IServer } from "@/components";
-import {
-  Box,
-  Button,
-  TextInput,
-  Select,
-  Switch,
-  InputWrapper,
-  Paper,
-  Group,
-  Text,
-  SimpleGrid,
-} from "@mantine/core";
+import { Box, Button, TextInput, Select, Switch, InputWrapper, Paper, Group, Text, SimpleGrid } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { Observer } from "mobx-react-lite";
+import { Observer, useObserver } from "mobx-react-lite";
 import React, { useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useCommonStore } from "../stores";
 import { invoke } from "@tauri-apps/api/tauri";
 import * as fs from "@tauri-apps/api/fs";
+import { useClipboard } from "@mantine/hooks";
 
 export const HomePage: React.FC = () => {
   const { t } = useTranslation();
@@ -30,33 +20,48 @@ export const HomePage: React.FC = () => {
       ipAddress: "",
     },
   });
-
-  // 监听服务器选择
+  console.log(form.values.autoIP);
+  // 当form变化时存入store
   useEffect(() => {
     if (form.values.server) {
-      const server: IServer = JSON.parse(form.values.server);
-      form.setValues({
-        ...form.values,
-        community: server.community,
-        autoIP: true,
-      });
-
-      console.log(server);
+      commonStore.currentServerForm = form.values;
     }
-  }, [form.values.server]);
+  }, [form.values]);
+
+  // 窗口初始化时从store读取之前的数据
+  useEffect(() => {
+    if (commonStore.currentServerForm && commonStore.currentServerForm.server) {
+      form.setValues({
+        ...commonStore.currentServerForm,
+      });
+    }
+  }, []);
 
   const startEdge = useCallback(() => {
     if (form.values.server) {
-      const server: IServer = JSON.parse(form.values.server);
-      invoke("start_edge", { server: form.values.server });
-      commonStore.state = "RUNNING";
-      console.log("Server Start", server);
+      const server = commonStore.servers.find((it) => it.id == form.values.server);
+      if (server) {
+        invoke("start_edge", { server: JSON.stringify(server) });
+        commonStore.state = "RUNNING";
+        console.log("Server Start", server);
+      }
     }
   }, [form.values]);
 
   const stopEdge = useCallback(() => {
     invoke("stop_edge", { server: form.values.server });
     commonStore.state = "STOPPING";
+  }, []);
+
+  const pickServer = useCallback((serverId: string) => {
+    commonStore.currentServer = commonStore.servers.find((it) => it.id == serverId);
+
+    form.setValues({
+      ...form.values,
+      server: serverId!,
+      community: commonStore.currentServer?.community || "",
+      autoIP: true,
+    });
   }, []);
 
   return (
@@ -70,9 +75,12 @@ export const HomePage: React.FC = () => {
                   className="flex-1"
                   data={commonStore.servers.map((it) => ({
                     label: it.host,
-                    value: JSON.stringify(it),
+                    value: it.id,
                   }))}
                   {...form.getInputProps("server")}
+                  onChange={(v) => {
+                    pickServer(v!);
+                  }}
                 />
               )}
             </Observer>
@@ -93,7 +101,10 @@ export const HomePage: React.FC = () => {
           {...form.getInputProps("community")}
         />
 
-        <InputWrapper label="IP地址" className="mt-4">
+        <InputWrapper
+          label="IP地址"
+          className="mt-4"
+        >
           <Switch
             className="mt-2"
             label="自动获取地址"
@@ -118,7 +129,10 @@ export const HomePage: React.FC = () => {
                   return <Button onClick={startEdge}>启动服务</Button>;
                 case "STOPPING":
                   return (
-                    <Button loading color="red">
+                    <Button
+                      loading
+                      color="red"
+                    >
                       停止中
                     </Button>
                   );
@@ -126,7 +140,10 @@ export const HomePage: React.FC = () => {
                   return <Button loading>服务启动中</Button>;
                 case "RUNNING":
                   return (
-                    <Button color="red" onClick={stopEdge}>
+                    <Button
+                      color="red"
+                      onClick={stopEdge}
+                    >
                       停止服务
                     </Button>
                   );
@@ -146,24 +163,78 @@ export const HomePage: React.FC = () => {
           { maxWidth: "xs", cols: 1 },
         ]}
       >
-        <Paper withBorder p="md" radius="md">
-          <Group position="apart">
-            <Text size="xs" color="dimmed" className="font-bold">
-              IP地址
-            </Text>
-          </Group>
-
-          <Group align="flex-end" spacing="xs" mt={12}>
-            <Observer>
-              {() => (
-                <Text className="text-lg font-bold">
-                  {commonStore.currentIp || "-"}
-                </Text>
-              )}
-            </Observer>
-          </Group>
-        </Paper>
+        <Observer>
+          {() => (
+            <>
+              <StatusCard
+                name="IP地址"
+                value={commonStore.currentIp}
+              />
+              <StatusCard
+                name="MAC地址"
+                value={commonStore.currentMac}
+              />
+              <StatusCard
+                name="MTU"
+                value={commonStore.currentMTU}
+              />
+              <StatusCard
+                name="跃点"
+                value={commonStore.currentMetric}
+              />
+              <StatusCard
+                name="网卡"
+                value={commonStore.currentDevice}
+              />
+            </>
+          )}
+        </Observer>
       </SimpleGrid>
     </div>
+  );
+};
+
+const StatusCard: React.FC<{
+  name: string;
+  value: string | number;
+}> = (props) => {
+  const clipboard = useClipboard({ timeout: 1000 });
+
+  return (
+    <Paper
+      withBorder
+      p="md"
+      radius="md"
+    >
+      <Group position="apart">
+        <Text
+          size="xs"
+          color="dimmed"
+          className="w-full font-bold"
+        >
+          <div className="flex items-center justify-between">
+            <span>{props.name}</span>
+            <Button
+              variant="subtle"
+              compact
+              className="ml-2"
+              size="xs"
+              color={clipboard.copied ? "teal" : "blue"}
+              onClick={() => clipboard.copy(props.value)}
+            >
+              {clipboard.copied ? "已复制" : "复制"}
+            </Button>
+          </div>
+        </Text>
+      </Group>
+
+      <Group
+        align="flex-end"
+        spacing="xs"
+        mt={12}
+      >
+        <Text className="select-text text-lg font-bold">{props.value || "-"}</Text>
+      </Group>
+    </Paper>
   );
 };

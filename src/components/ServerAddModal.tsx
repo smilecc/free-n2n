@@ -14,7 +14,7 @@ import { useForm } from "@mantine/form";
 import { useReactive } from "ahooks";
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { DEFAULT_SERVER_CONFIG, IServer } from "./ServerModel";
+import { IServer, newServer } from "./ServerModel";
 
 export interface IServerAddModalProps {
   opened: boolean;
@@ -42,7 +42,7 @@ export const ServerAddModal: React.FC<IServerAddModalProps> = (props) => {
   useEffect(() => {
     if (props.opened) {
       state.panel = "basic";
-      form.setValues({ ...DEFAULT_SERVER_CONFIG });
+      form.setValues({ ...newServer() });
     }
   }, [props.opened]);
 

@@ -1,4 +1,7 @@
+import { nanoid } from "nanoid";
+
 export interface IServer {
+  id: string;
   host: string;
   community: string;
   enablePMTU: boolean;
@@ -7,7 +10,7 @@ export interface IServer {
   compress: "NONE" | "z1";
 }
 
-export const DEFAULT_SERVER_CONFIG: IServer = {
+export const DEFAULT_SERVER_CONFIG: Partial<IServer> = {
   host: "",
   community: "",
   enablePMTU: false,
@@ -15,3 +18,10 @@ export const DEFAULT_SERVER_CONFIG: IServer = {
   regInterval: 20,
   compress: "NONE",
 };
+
+export function newServer(): IServer {
+  return {
+    ...DEFAULT_SERVER_CONFIG,
+    id: nanoid(),
+  } as any;
+}

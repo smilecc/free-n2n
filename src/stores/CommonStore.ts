@@ -38,9 +38,13 @@ export class CommonStore {
         .then((serverJson) => {
           if (serverJson) {
             const server = JSON.parse(serverJson);
-            console.log(server);
+            // console.log(server);
             runInAction(() => {
               this.currentIp = server?.ip_addr || "";
+              this.currentMac = server?.device_mac || "";
+              this.currentDevice = server?.device_name || "";
+              this.currentMTU = server?.mtu || "";
+              this.currentMetric = server?.metric || "";
 
               if (this.state == "INIT") {
                 this.state = server?.ip_addr ? "RUNNING" : "STOP";
@@ -63,7 +67,13 @@ export class CommonStore {
   serverAddModal: boolean = false;
   servers: IServer[] = [];
   state: EdgeState = "INIT";
+  currentServer: IServer | undefined = undefined;
+  currentServerForm: any = {};
   currentIp: string = "";
+  currentMac: string = "";
+  currentDevice: string = "";
+  currentMTU: string = "";
+  currentMetric: string = "";
   logContent: string = "";
 
   saveServer() {
