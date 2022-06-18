@@ -19,10 +19,11 @@ import {
   SwitchHorizontal,
   Logout,
   Dashboard,
+  InfoSquare,
 } from "tabler-icons-react";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import { emit, listen } from "@tauri-apps/api/event";
-import { HomePage, LogPage } from "@/pages";
+import { HomePage, LogPage, SettingPage } from "@/pages";
 import { appWindow } from "@tauri-apps/api/window";
 import { Observer } from "mobx-react-lite";
 import { ServerAddModal } from "@/components";
@@ -110,12 +111,8 @@ const useStyles = createStyles((theme, _params, getRef) => {
 
 const data = [
   { link: "/", label: "首页", icon: Dashboard },
-  { link: "/log", label: "日志", icon: Receipt2 },
-  { link: "", label: "Security", icon: Fingerprint },
-  { link: "", label: "SSH Keys", icon: Key },
-  { link: "", label: "Databases", icon: DatabaseImport },
-  { link: "", label: "Authentication", icon: TwoFA },
-  { link: "", label: "设置", icon: Settings },
+  { link: "/log", label: "日志", icon: InfoSquare },
+  { link: "/setting", label: "设置", icon: Settings },
 ];
 
 export function App() {
@@ -180,14 +177,14 @@ export function App() {
           </Navbar.Section>
 
           <Navbar.Section className={classes.footer}>
-            <a
+            {/* <a
               href="#"
               className={classes.link}
               onClick={(event) => event.preventDefault()}
             >
               <SwitchHorizontal className={classes.linkIcon} />
               <span>Change account</span>
-            </a>
+            </a> */}
 
             <a
               href="#"
@@ -217,7 +214,7 @@ export function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/log" element={<LogPage />} />
-        <Route path="/test" element={<div>test</div>} />
+        <Route path="/setting" element={<SettingPage />} />
       </Routes>
     </AppShell>
   );
